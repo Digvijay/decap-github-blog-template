@@ -1,0 +1,184 @@
+---
+layout: default
+title: "Digvijay's Blog"
+---
+
+<style>
+  .blog-header {
+    margin-bottom: 2.5rem;
+  }
+  .blog-header h1 {
+    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-weight: 800;
+    color: var(--heading-text);
+    letter-spacing: -0.75px;
+    margin-bottom: 0.5rem;
+  }
+  .blog-header p {
+    color: var(--muted);
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
+  }
+
+  .active-filter-bar {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+  }
+  .filter-label {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .filter-tag-pill {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 12px;
+  }
+  .clear-filter-btn {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  .clear-filter-btn:hover { color: var(--heading-text); }
+
+  .posts-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+  
+  .post-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    padding: 1.75rem;
+    border-radius: 14px;
+    text-decoration: none;
+    display: block;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .post-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+  .post-card.hidden {
+    display: none;
+  }
+  .post-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .post-title {
+    font-size: clamp(1.15rem, 3vw, 1.35rem);
+    font-weight: 700;
+    color: var(--heading-text);
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+  .post-desc {
+    font-size: 0.98rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .card-tag {
+    font-size: 0.78rem;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    padding: 0.1rem 0.5rem;
+    border-radius: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .post-card { padding: 1.25rem; }
+  }
+</style>
+
+<div class="blog-header">
+  <h1>Digvijay's Blog</h1>
+  <p>Thoughts and articles on infrastructure, software engineering, and cloud architecture.</p>
+</div>
+
+<div id="active-filter-bar" class="active-filter-bar">
+  <span class="filter-label">Filtering by topic:</span>
+  <span id="filter-tag-pill" class="filter-tag-pill">#tag</span>
+  <span id="clear-filter-btn" class="clear-filter-btn">Show all posts</span>
+</div>
+
+<div class="posts-grid" id="posts-grid">
+  {% for post in site.posts %}
+    {% assign post_words = post.content | strip_html | number_of_words %}
+    {% assign post_read_time = post_words | divided_by: 200 | plus: 1 %}
+    {% assign tag_string = post.tags | join: " " | downcase %}
+    
+    <a href="{{ post.url }}" class="post-card" data-tags="{{ tag_string }}">
+      <div class="post-meta-row">
+        <span>📅 {{ post.date | date: "%b %d, %Y" }}</span>
+        <span>⏱️ {{ post_read_time }} min read</span>
+      </div>
+      <div class="post-title">{{ post.title }}</div>
+      {% if post.description %}
+        <div class="post-desc">{{ post.description }}</div>
+      {% endif %}
+
+      {% if post.tags and post.tags.size > 0 %}
+        <div class="card-tags">
+          {% for tag in post.tags %}
+            <span class="card-tag">#{{ tag }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </a>
+  {% else %}
+    <p style="color: var(--muted);">No articles found yet.</p>
+  {% endfor %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const params = new URLSearchParams(window.location.search);
+    const tag = params.get('tag');
+    if (tag) {
+      const normalizedTag = tag.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const filterBar = document.getElementById('active-filter-bar');
+      const tagPill = document.getElementById('filter-tag-pill');
+      const clearBtn = document.getElementById('clear-filter-btn');
+      const cards = document.querySelectorAll('.post-card');
+
+      filterBar.style.display = 'flex';
+      tagPill.textContent = '#' + tag;
+
+      cards.forEach(card => {
+        const cardTags = (card.getAttribute('data-tags') || '').replace(/[^a-z0-9\s]/g, '');
+        if (cardTags.includes(normalizedTag)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+
+      clearBtn.addEventListener('click', function() {
+        window.location.href = '/';
+      });
+    }
+  });
+</script>

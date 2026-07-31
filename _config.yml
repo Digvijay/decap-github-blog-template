@@ -1,0 +1,8 @@
+title: "<your-site-name>"
+description: "A fast, zero-cost, zero-maintenance static blog template powered by Jekyll, Decap CMS & Cloudflare Workers."
+url: "https://<your-domain>"
+baseurl: ""
+github_username: "<your-github-username>"
+
+future: true
+timezone: "UTC"
